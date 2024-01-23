@@ -1,0 +1,1 @@
+print("Solutions for module 6");
