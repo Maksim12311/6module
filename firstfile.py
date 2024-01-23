@@ -1,15 +1,38 @@
-import time
+
+import timeit
 from threading import Thread
 
-def get_thread(thread_name):
-	time.sleep(1)
-	print(f'The flow {thread_name} started!')
 
-list = ['a','b','c','d','e']
-threads = [Thread(target = get_thread,args = (i,)) for i in list]
+def sequential_function():
+    result = sum(range(1000000))
+    return result
 
-for t in threads:
-	t.start()
+def parallel_function():
+    results = []
 
-for t in threads:
-	t.join()
+
+    def worker(start, end):
+        partial_result = sum(range(start, end))
+        results.append(partial_result)
+
+    
+    threads = []
+    for i in range(0, 1000000, 100000):
+        thread = Thread(target=worker, args=(i, i+100000))
+        threads.append(thread)
+        thread.start()
+
+    
+    for thread in threads:
+        thread.join()
+
+    return sum(results)
+
+
+sequential_time = timeit.timeit(sequential_function, number=1)
+
+
+parallel_time = timeit.timeit(parallel_function, number=1)
+
+print(f"Sequential Time: {sequential_time} seconds")
+print(f"Parallel Time: {parallel_time} seconds")
