@@ -1,38 +1,36 @@
 
-import timeit
-from threading import Thread
+
+import requests
+import threading
+import time
+
+def get_html(link):
+    response = requests.get(link)
+    html_content = response.text
+   
+
+start_time = time.time()
 
 
-def sequential_function():
-    result = sum(range(1000000))
-    return result
+links = ["https://example.com", "https://example.org", "https://example.net", "https://example.edu", "https://example.gov"]
+for link in links:
+    get_html(link)
 
-def parallel_function():
-    results = []
-
-
-    def worker(start, end):
-        partial_result = sum(range(start, end))
-        results.append(partial_result)
-
-    
-    threads = []
-    for i in range(0, 1000000, 100000):
-        thread = Thread(target=worker, args=(i, i+100000))
-        threads.append(thread)
-        thread.start()
-
-    
-    for thread in threads:
-        thread.join()
-
-    return sum(results)
+sequential_time = time.time() - start_time
+start_time = time.time()
 
 
-sequential_time = timeit.timeit(sequential_function, number=1)
+threads = []
+for link in links:
+    thread = threading.Thread(target=get_html, args=(link,))
+    threads.append(thread)
+    thread.start()
 
 
-parallel_time = timeit.timeit(parallel_function, number=1)
+for thread in threads:
+    thread.join()
+
+parallel_time = time.time() - start_time
 
 print(f"Sequential Time: {sequential_time} seconds")
 print(f"Parallel Time: {parallel_time} seconds")
